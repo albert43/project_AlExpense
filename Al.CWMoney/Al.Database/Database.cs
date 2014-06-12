@@ -24,31 +24,47 @@ namespace Al.Database
             AUTODECREASE
         }
 
-        public struct FOREIGN_KEY
+        public struct FOREIGN_KEY_S
         {
             String strForeignTable;
             String[] strColumnName;
         }
 
-        public struct COLUMN_CONSTRAIN
+        public struct COLUMN_CONSTRAIN_S
         {
             PRIMARY_KEY_T PrimaryKey;
             Boolean bNotNull;
             Boolean bUnique;
             String strDefaultValue;
-            FOREIGN_KEY ForeignKey;
+            FOREIGN_KEY_S ForeignKey;
         }
 
-        public struct COLUMN_DEF
+        public struct COLUMN_DEF_S
         {
             String strColumnName;
-            COLUMN_CONSTRAIN Costrnt;
+            COLUMN_CONSTRAIN_S Costrnt;
         }
 
-        public struct COLUMN_DATA
+        public struct COLUMN_DATA_S
         {
             String strColumnName;
             String strValue;
+        }
+
+        public enum RELATION_OP_T
+        {
+            LARGE_THAN,
+            LESS_THAN,
+            EQUAL_TO,
+            BETWEEN
+        }
+
+        public struct SELECT_EXPRES_S
+        {
+            String strColumnName;
+            RELATION_OP_T Operator;
+            String strValue1;
+            String strValue2;       //  Only in use when Operator is BETWEEN.
         }
 
         private String m_strDbFullPath;
@@ -60,15 +76,31 @@ namespace Al.Database
             m_strPassword = strPassword;
         }
 
-        public void createTable(String strTableName, COLUMN_DEF[] ColumnDef)
+        public ~DatabaseApi()
         {
         }
 
-        public void insertData(String strTableName, COLUMN_DATA[] Value)
+        public void createTable(String strTableName, COLUMN_DEF_S[] ColumnDef)
         {
         }
 
-        public void deleteData()
+        public void insertData(String strTableName, COLUMN_DATA_S[] Value)
+        {
+        }
+
+        public void deleteData(String strTableName, SELECT_EXPRES_S[] Exp)
+        {
+        }
+
+        public void selectData(String strTableName, SELECT_EXPRES_S[] Exp)
+        {
+        }
+
+        public void commit()
+        {
+        }
+
+        public void revert()
         {
         }
     }
