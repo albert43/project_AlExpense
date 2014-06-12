@@ -28,16 +28,16 @@ namespace Al.Config
     /// </summary>
     public class ConfigApi
     {
-        private String m_strFileFullPath = null;
+        private String m_strConfigFullPath = null;
         
         /// <summary>
         /// Constructor.
         /// Every instance is depended on a config file.
         /// </summary>
-        /// <param name="strFileFullPath">The full path of the configuration file.</param>
-        public ConfigApi (String strFileFullPath)
+        /// <param name="strConfigFullPath">The full path of the configuration file.</param>
+        public ConfigApi (String strConfigFullPath)
         {
-            this.m_strFileFullPath = strFileFullPath;
+            this.m_strConfigFullPath = strConfigFullPath;
         }
 
         public void setConfig<T>(T root)
@@ -48,7 +48,7 @@ namespace Al.Config
             strJson = JsonConvert.SerializeObject(root, Formatting.Indented);
             
             //  Write in config file.
-            StreamWriter sw = new StreamWriter(m_strFileFullPath);
+            StreamWriter sw = new StreamWriter(m_strConfigFullPath);
             sw.Write(strJson);
             sw.Close();
         }
@@ -59,7 +59,7 @@ namespace Al.Config
             String strJson;
 
             //  Read config file.
-            StreamReader sr = new StreamReader(m_strFileFullPath);
+            StreamReader sr = new StreamReader(m_strConfigFullPath);
             strJson = sr.ReadToEnd();
             sr.Close();
 
