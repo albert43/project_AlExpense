@@ -9,7 +9,8 @@ namespace Al.CWMoney
 {
     static class Program
     {
-        private const String CONFIG_PATH = "alcwmoney.json";
+        private const String CONFIG_PATH = "alcwmoney.config";
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -20,8 +21,9 @@ namespace Al.CWMoney
             Application.SetCompatibleTextRenderingDefault(false);
 
             if (File.Exists(CONFIG_PATH) == false)
-                Application.Run(new FormSetting());
+                Application.Run(new FormSetting(CONFIG_PATH));
 
+            Application.Run(new FormSetting(CONFIG_PATH));
             if (File.Exists(CONFIG_PATH) == true)
                 Application.Run(new Form_Main());
         }

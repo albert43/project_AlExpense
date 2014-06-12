@@ -14,27 +14,32 @@ namespace Al.CWMoney
 {
     public partial class FormSetting : Form
     {
-        public FormSetting()
+        private ConfigApi m_Config;
+
+        public FormSetting(String strConfigName)
         {
             InitializeComponent();
+            m_Config = new ConfigApi(strConfigName);
         }
 
         private void button_Save_Click(object sender, EventArgs e)
         {
-            SysemConf confData = new SysemConf();
+            SystemConf confData = new SystemConf();
 
-            confData.m_strDbDir = textBox_DbDir.Text;
-            confData.m_Sync = new SynConf();
-            confData.m_Sync.m_strDir = textBox_DropboxDir.Text;
+            confData.DbDir = textBox_DbDir.Text;
+            confData.Synch = new SynConf();
+            confData.Synch.Dir = textBox_DropboxDir.Text;
 
-            ConfigApi conf = new ConfigApi("conf");
+            m_Config.setConfig<SystemConf>(confData);
+        }
 
-            conf.setConfig<SysemConf>(confData);
+        private void FormSetting_Load(object sender, EventArgs e)
+        {
+            //  Get config data.
+            SystemConf confData = m_Config.getConfig<SystemConf>();
 
-            if (textBox_DbDir.Text.Length > 0)
-                MessageBox.Show(textBox_DbDir.Text);
-            else
-                MessageBox.Show("No Data");
+            textBox_DbDir.Text = confData.DbDir;
+            textBox_DropboxDir.Text = confData.Synch.Dir;
         }
     }
 }

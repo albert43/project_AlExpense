@@ -13,7 +13,9 @@
 x64/
 build/
 bld/
-[Bb]in/
+#[Bb]in/
+[Bb]in/[Dd]ebug
+[Bb]in/[Rr]elease
 [Oo]bj/
 
 # MSTest test Results

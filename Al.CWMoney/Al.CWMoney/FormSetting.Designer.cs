@@ -111,6 +111,7 @@
             this.Controls.Add(this.label_DbDir);
             this.Name = "FormSetting";
             this.Text = "FormSetting";
+            this.Load += new System.EventHandler(this.FormSetting_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
