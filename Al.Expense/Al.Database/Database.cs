@@ -121,15 +121,20 @@ namespace Al.Database
 
         private SQLiteConnection m_sqliteConn;
         private SQLiteCommand m_sqliteCmd;
+        private String m_strDbFullPath;
+        private String m_strPassword;
 
         public DatabaseApi(String strDbFullPath, String strPassword)
         {
-            SQLiteConnectionStringBuilder sqliteConnString = new SQLiteConnectionStringBuilder();
+            m_strDbFullPath = strDbFullPath;
+            m_strPassword = strPassword;
 
-            sqliteConnString.DataSource = strDbFullPath;
-            sqliteConnString.Password = strPassword;
+            //SQLiteConnectionStringBuilder sqliteConnString = new SQLiteConnectionStringBuilder();
 
-            m_sqliteConn = new SQLiteConnection(sqliteConnString.ToString());
+            //sqliteConnString.DataSource = strDbFullPath;
+            //sqliteConnString.Password = strPassword;
+
+            //m_sqliteConn = new SQLiteConnection(sqliteConnString.ToString());
         }
 
         ~DatabaseApi()
