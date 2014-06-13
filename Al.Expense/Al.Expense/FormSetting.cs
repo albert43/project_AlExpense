@@ -22,17 +22,6 @@ namespace Al.Expense
             m_Config = new ConfigApi(strConfigName);
         }
 
-        private void button_Save_Click(object sender, EventArgs e)
-        {
-            SystemConf confData = new SystemConf();
-
-            confData.DbDir = textBox_DbDir.Text;
-            confData.Sync = new SynConf();
-            confData.Sync.Dir = textBox_DropboxDir.Text;
-
-            m_Config.setConfig<SystemConf>(confData);
-        }
-
         private void FormSetting_Load(object sender, EventArgs e)
         {
             //  Get config data.
@@ -56,6 +45,23 @@ namespace Al.Expense
             dir.ShowDialog();
 
             textBox_DropboxDir.Text = dir.SelectedPath;
+        }
+
+        private void button_Save_Click(object sender, EventArgs e)
+        {
+            SystemConf confData = new SystemConf();
+
+            confData.DbDir = textBox_DbDir.Text;
+            confData.Sync = new SynConf();
+            confData.Sync.Dir = textBox_DropboxDir.Text;
+
+            m_Config.setConfig<SystemConf>(confData);
+            this.Close();
+        }
+
+        private void button_Cancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

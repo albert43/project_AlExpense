@@ -35,6 +35,7 @@
             this.textBox_DropboxDir = new System.Windows.Forms.TextBox();
             this.button_DropboxDir = new System.Windows.Forms.Button();
             this.button_Save = new System.Windows.Forms.Button();
+            this.button_Cancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label_DbDir
@@ -99,11 +100,22 @@
             this.button_Save.UseVisualStyleBackColor = true;
             this.button_Save.Click += new System.EventHandler(this.button_Save_Click);
             // 
+            // button_Cancel
+            // 
+            this.button_Cancel.Location = new System.Drawing.Point(711, 419);
+            this.button_Cancel.Name = "button_Cancel";
+            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
+            this.button_Cancel.TabIndex = 7;
+            this.button_Cancel.Text = "Cancel";
+            this.button_Cancel.UseVisualStyleBackColor = true;
+            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
+            // 
             // FormSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(897, 454);
+            this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_Save);
             this.Controls.Add(this.button_DropboxDir);
             this.Controls.Add(this.textBox_DropboxDir);
@@ -128,5 +140,6 @@
         private System.Windows.Forms.TextBox textBox_DropboxDir;
         private System.Windows.Forms.Button button_DropboxDir;
         private System.Windows.Forms.Button button_Save;
+        private System.Windows.Forms.Button button_Cancel;
     }
 }

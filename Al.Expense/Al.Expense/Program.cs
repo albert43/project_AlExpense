@@ -23,9 +23,11 @@ namespace Al.Expense
             if (File.Exists(CONFIG_PATH) == false)
                 Application.Run(new FormSetting(CONFIG_PATH));
 
-            Application.Run(new FormSetting(CONFIG_PATH));
+            
             if (File.Exists(CONFIG_PATH) == true)
-                Application.Run(new Form_Main());
+                Application.Run(new Form_Main(CONFIG_PATH));
+
+            Application.Exit();
         }
     }
 }

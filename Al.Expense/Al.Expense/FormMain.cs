@@ -12,9 +12,19 @@ namespace Al.Expense
 {
     public partial class Form_Main : Form
     {
-        public Form_Main()
+        private String m_strConfigName;
+
+        public Form_Main(String strConfigName)
         {
             InitializeComponent();
+            m_strConfigName = strConfigName;
+        }
+
+        private void settingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormSetting Form = new FormSetting(m_strConfigName);
+
+            Form.ShowDialog();
         }
     }
 }
