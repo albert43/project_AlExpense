@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 using System.Data.SQLite;
 
@@ -129,12 +129,14 @@ namespace Al.Database
             m_strDbFullPath = strDbFullPath;
             m_strPassword = strPassword;
 
-            //SQLiteConnectionStringBuilder sqliteConnString = new SQLiteConnectionStringBuilder();
+            SQLiteConnectionStringBuilder sqliteConnString = new SQLiteConnectionStringBuilder();
 
-            //sqliteConnString.DataSource = strDbFullPath;
-            //sqliteConnString.Password = strPassword;
+            sqliteConnString.DataSource = strDbFullPath;
+            if ((strPassword != null) && (strPassword.Length > 0))
+                sqliteConnString.Password = strPassword;
 
-            //m_sqliteConn = new SQLiteConnection(sqliteConnString.ToString());
+            String str = sqliteConnString.ToString();
+            m_sqliteConn = new SQLiteConnection("Data source=database.db");
         }
 
         ~DatabaseApi()
@@ -143,11 +145,11 @@ namespace Al.Database
 
         public void createTable(String strTableName, COLUMN_DEF_S[] ColumnDef)
         {
-            String strColumnDef = "";
-            String strColumnConstraint;
-            String strPrimaryKey;
-            String strDefaultValue;
-            String strForeignKey;
+            String strColumnDef = null;
+            String strColumnConstraint = null;
+            String strPrimaryKey = null;
+            String strDefaultValue = null;
+            String strForeignKey = null;
             int i;
 
             for (i = 0; i < ColumnDef.Length; i++)
@@ -155,32 +157,40 @@ namespace Al.Database
                 COLUMN_CONSTRAIN_S ColCostrnt = ColumnDef[i].Costrnt;
 
                 //  Foreign key
-                String strColumnList = "";
-                int iCol;
-                for (iCol = 0; iCol < ColCostrnt.ForeignKey.strColumnName.Length; iCol++)
-                    strColumnList += ColCostrnt.ForeignKey.strColumnName[iCol];
-                
-                strForeignKey = String.Format(FOREIGN_KEY_FMT, ColCostrnt.ForeignKey.strForeignTable, strColumnList);
-                
+                if (ColCostrnt.ForeignKey.strForeignTable != null)
+                {
+                    String strColumnList = "";
+                    if (ColCostrnt.ForeignKey.strColumnName != null)
+                    {
+                        for (int iCol = 0; iCol < ColCostrnt.ForeignKey.strColumnName.Length; iCol++)
+                            strColumnList += ColCostrnt.ForeignKey.strColumnName[iCol];
+                    }
+                    strForeignKey = String.Format(FOREIGN_KEY_FMT, ColCostrnt.ForeignKey.strForeignTable, strColumnList);
+                }
+
                 //  Default value
-                strDefaultValue = String.Format(DEFAULT_VALUE_FMT, ColCostrnt.strDefaultValue);
+                if ((ColCostrnt.strDefaultValue != null) && (ColCostrnt.strDefaultValue.Length > 0))
+                    strDefaultValue = String.Format(DEFAULT_VALUE_FMT, ColCostrnt.strDefaultValue);
 
                 //  Primary key
-                switch (ColCostrnt.PrimaryKey)
+                if (ColCostrnt.PrimaryKey != null)
                 {
-                    case PRIMARY_KEY_T.AUTO_INCREASE:
-                        strPrimaryKey = String.Format(PRIMARY_KEY_FMT, ASC_TAG, AUTOINCREMENT_TAG);
-                        break;
-                    case PRIMARY_KEY_T.AUTO_DECREASE:
-                        strPrimaryKey = String.Format(PRIMARY_KEY_FMT, DESC_TAG, AUTOINCREMENT_TAG);
-                        break;
-                    case PRIMARY_KEY_T.NOT_AUTO:
-                        strPrimaryKey = String.Format(PRIMARY_KEY_FMT, null, null);
-                        break;
-                    case PRIMARY_KEY_T.NONE:
-                    default:
-                        strPrimaryKey = null;
-                        break;
+                    switch (ColCostrnt.PrimaryKey)
+                    {
+                        case PRIMARY_KEY_T.AUTO_INCREASE:
+                            strPrimaryKey = "INTEGER " + String.Format(PRIMARY_KEY_FMT, ASC_TAG, AUTOINCREMENT_TAG);
+                            break;
+                        case PRIMARY_KEY_T.AUTO_DECREASE:
+                            strPrimaryKey = "INTEGER " + String.Format(PRIMARY_KEY_FMT, DESC_TAG, AUTOINCREMENT_TAG);
+                            break;
+                        case PRIMARY_KEY_T.NOT_AUTO:
+                            strPrimaryKey = String.Format(PRIMARY_KEY_FMT, null, null);
+                            break;
+                        case PRIMARY_KEY_T.NONE:
+                        default:
+                            strPrimaryKey = null;
+                            break;
+                    }
                 }
 
                 //  Column constraint.
@@ -194,7 +204,14 @@ namespace Al.Database
                 );
                 
                 //  Column define(s)
-                strColumnDef = strColumnDef + " " + String.Format(
+                if (strColumnDef == null)
+                    strColumnDef = String.Format(
+                        COLUMN_DEFIN_FMT,
+                        ColumnDef[i].strColumnName,
+                        strColumnConstraint
+                    );
+                else
+                    strColumnDef = strColumnDef + "," + String.Format(
                     COLUMN_DEFIN_FMT,
                     ColumnDef[i].strColumnName,
                     strColumnConstraint

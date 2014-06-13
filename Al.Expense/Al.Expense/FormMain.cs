@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 using Al.Database;
@@ -25,12 +25,16 @@ namespace Al.Expense
             m_strConfigName = strConfigName;
 
             //  Template test for DatabaseApi class
-            m_Db = new DatabaseApi(DB_PATH, "");
+            m_Db = new DatabaseApi(DB_PATH, null);
 
-            DatabaseApi.COLUMN_DEF_S[] Coldef = new DatabaseApi.COLUMN_DEF_S[1];
+            DatabaseApi.COLUMN_DEF_S[] Coldef = new DatabaseApi.COLUMN_DEF_S[2];
 
             Coldef[0].strColumnName = "id";
             Coldef[0].Costrnt.PrimaryKey = DatabaseApi.PRIMARY_KEY_T.AUTO_INCREASE;
+            Coldef[1].strColumnName = "date";
+            Coldef[1].Costrnt.bNotNull = true;
+            Coldef[1].Costrnt.bUnique = false;
+            Coldef[1].Costrnt.strDefaultValue = DateTime.Today.ToString();
 
             m_Db.createTable("expense", Coldef);
         }
