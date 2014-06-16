@@ -252,6 +252,13 @@ namespace Al.Database
         private readonly String DELETE_DATA_FMT = "DELETE FROM {0} {1}";
 
         /// <summary>
+        /// {0}: cloumn-name(s)
+        /// {1}: table-name
+        /// {2}: EXPR_FMT
+        /// </summary>
+        private readonly String SELECT_DATA_FMT = "SELECT {0} FROM {1} {2}";
+
+        /// <summary>
         /// {0}: column-name
         /// {1}: data-type
         /// {2}: COLUMN_CONSTRAINT_FMT
@@ -286,18 +293,12 @@ namespace Al.Database
 
         /// <summary>
         /// {0}: column-name
-        /// {1}: UNARY_OP_EXPR_FMT
-        /// </summary>
-        private readonly String EXPR_FMT = "WHERE {0} {1}";
-        
-        /// <summary>
-        /// {0}: NOT_TAG
-        /// {1}: column-name
+        /// {1}: NOT_TAG
         /// {2}: OPERATOR_TAGS
         /// {3}: data
         /// </summary>
-        private readonly String UNARY_OP_EXPR_FMT = "{0} {1} {2} {3}";
-
+        private readonly String EXPR_FMT = "WHERE {0} {1} {2} {3}";
+        
         //
         //  SQLite command tag.
         //
@@ -328,8 +329,7 @@ namespace Al.Database
             if ((strPassword != null) && (strPassword.Length > 0))
                 sqliteConnString.Password = strPassword;
 
-            String str = sqliteConnString.ToString();
-            m_sqliteConn = new SQLiteConnection("Data source=database.db");
+            m_sqliteConn = new SQLiteConnection(sqliteConnString.ToString());
         }
 
         ~DatabaseApi()
@@ -462,8 +462,9 @@ namespace Al.Database
             {
                 for (int i = 0; i < Exp.Length; i++)
                 {
-                    strSingleExp = String.Format(UNARY_OP_EXPR_FMT, Exp[i].bNot == true ? NOT_TAG : "",
-                                    Exp[i].strColumnName, OPERATOR_TAGS[(int)Exp[i].Operator], Exp[i].Value);
+                    strSingleExp = String.Format(EXPR_FMT, Exp[i].strColumnName, 
+                                    Exp[i].bNot == true ? NOT_TAG : "",
+                                    OPERATOR_TAGS[(int)Exp[i].Operator], Exp[i].Value);
                     strExps = String.Concat(strExps, strSingleExp);
                 }
             }
@@ -476,11 +477,90 @@ namespace Al.Database
             m_sqliteConn.Close();
         }
 
-        public Data[][] selectData(String strTableName, String[] strColumns, SELECT_EXPRES_S[] Exp)
+        public Data[][] selectData(String strTableName, String[] strResultColumns, SELECT_EXPRES_S[] Exp)
         {
-            Data[][] selectData = null;
+            SQLiteDataReader sqliteReader;
+            Data[][] DataTable = null;
+            String strSingleExp = "";
+            String strExps = "";
+            String strColumns = "";
 
-            return selectData;
+            //  Deal with the UNARY_OP_EXPR_FMT
+            if (Exp != null)
+            {
+                for (int i = 0; i < Exp.Length; i++)
+                {
+                    strSingleExp = String.Format(EXPR_FMT, Exp[i].strColumnName,
+                                    Exp[i].bNot == true ? NOT_TAG : "",
+                                    OPERATOR_TAGS[(int)Exp[i].Operator], Exp[i].Value);
+                    strExps = String.Concat(strExps, strSingleExp);
+                }
+            }
+
+            //  Deal with the column list.
+            if ((strResultColumns == null) || (strResultColumns.Length == 0))
+                strColumns = "*";
+            else
+            {
+                for (int i = 0; i < strResultColumns.Length; i++)
+                {
+                    strColumns = String.Concat(strColumns, "'", strResultColumns[i], "',");
+                }
+            }
+
+            //  Execute the command.
+            m_sqliteConn.Open();
+            m_sqliteCmd = m_sqliteConn.CreateCommand();
+            m_sqliteCmd.CommandText = String.Format(SELECT_DATA_FMT, strColumns, strTableName, strExps);
+            sqliteReader = m_sqliteCmd.ExecuteReader();
+            
+            //  Read the data
+            String strId = "";
+            String strDate = "";
+            String strItem = "";
+            String strAmount = "";
+            String strCategory = "";
+            String strDescription = "";
+            String strCheck = "";
+            String strDataType;
+            String strColumnName;
+            int iData = 0;
+
+            while (sqliteReader.Read() == true)
+            {
+                for (int iCol = 0; iCol < strResultColumns.Length; iCol++)
+                {
+                    DataTable[iData, iCol] = new Data();
+                }
+                
+                strId = strId + sqliteReader["id"].ToString() + ",";
+                strDate = strDate + sqliteReader["date"].ToString() + ",";
+                strItem = strItem + sqliteReader["item"].ToString() + ",";
+                strAmount = strAmount + sqliteReader["amount"].ToString() + ",";
+                strCategory = strCategory + sqliteReader["category"].ToString() + ",";
+                strDescription = strDescription + sqliteReader["description"].ToString() + ",";
+                strCheck = strCheck + sqliteReader["check"].ToString() + ",";
+
+                strDataType = sqliteReader.GetDataTypeName(0);
+                strDataType = sqliteReader.GetDataTypeName(1);
+                strDataType = sqliteReader.GetDataTypeName(2);
+                strDataType = sqliteReader.GetDataTypeName(3);
+                strDataType = sqliteReader.GetDataTypeName(4);
+                strDataType = sqliteReader.GetDataTypeName(5);
+                strDataType = sqliteReader.GetDataTypeName(6);
+
+                iIndex = sqliteReader.GetOrdinal("id");
+                iIndex = sqliteReader.GetOrdinal("date");
+                iIndex = sqliteReader.GetOrdinal("item");
+                iIndex = sqliteReader.GetOrdinal("amount");
+                iIndex = sqliteReader.GetOrdinal("category");
+                iIndex = sqliteReader.GetOrdinal("description");
+                iIndex = sqliteReader.GetOrdinal("check");
+            }
+
+            m_sqliteConn.Close();
+
+            return DataTable;
         }
 
         public void commit()

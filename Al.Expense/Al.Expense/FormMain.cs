@@ -28,6 +28,7 @@ namespace Al.Expense
             createTable();
             insertData();
             deleteData();
+            selectData();
         }
 
         private void createTable()
@@ -109,7 +110,15 @@ namespace Al.Expense
 
         private void deleteData()
         {
+            SELECT_EXPRES_S expr;
+            
+        }
 
+        private void selectData()
+        {
+            SELECT_EXPRES_S expr;
+
+            m_Db.selectData("expense", null, null);
         }
 
         private void settingToolStripMenuItem_Click(object sender, EventArgs e)
