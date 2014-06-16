@@ -480,59 +480,99 @@ namespace Al.Database
         public Data[][] selectData(String strTableName, String[] strResultColumns, SELECT_EXPRES_S[] Exp)
         {
             SQLiteDataReader sqliteReader;
-            Data[][] DataTable = null;
-            String strSingleExp = "";
-            String strExps = "";
-            String strColumns = "";
+            String strSingleExpCmd = "";
+            String strExpsCmd = "";
+            String strColumnsCmd = "";
 
             //  Deal with the UNARY_OP_EXPR_FMT
             if (Exp != null)
             {
                 for (int i = 0; i < Exp.Length; i++)
                 {
-                    strSingleExp = String.Format(EXPR_FMT, Exp[i].strColumnName,
+                    strSingleExpCmd = String.Format(EXPR_FMT, Exp[i].strColumnName,
                                     Exp[i].bNot == true ? NOT_TAG : "",
                                     OPERATOR_TAGS[(int)Exp[i].Operator], Exp[i].Value);
-                    strExps = String.Concat(strExps, strSingleExp);
+                    strExpsCmd = String.Concat(strExpsCmd, strSingleExpCmd);
                 }
             }
 
             //  Deal with the column list.
             if ((strResultColumns == null) || (strResultColumns.Length == 0))
-                strColumns = "*";
+                strColumnsCmd = "*";
             else
             {
                 for (int i = 0; i < strResultColumns.Length; i++)
                 {
-                    strColumns = String.Concat(strColumns, "'", strResultColumns[i], "',");
+                    strColumnsCmd = String.Concat(strColumnsCmd, "'", strResultColumns[i], "',");
                 }
             }
 
             //  Execute the command.
             m_sqliteConn.Open();
             m_sqliteCmd = m_sqliteConn.CreateCommand();
-            m_sqliteCmd.CommandText = String.Format(SELECT_DATA_FMT, strColumns, strTableName, strExps);
+            m_sqliteCmd.CommandText = String.Format(SELECT_DATA_FMT, strColumnsCmd, strTableName, strExpsCmd);
             sqliteReader = m_sqliteCmd.ExecuteReader();
             
+            //
             //  Read the data
-            String strId = "";
-            String strDate = "";
-            String strItem = "";
-            String strAmount = "";
-            String strCategory = "";
-            String strDescription = "";
-            String strCheck = "";
-            String strDataType;
-            String strColumnName;
-            int iData = 0;
+            //
+            Data[][] DataTable = null;
 
+            int iColumn;
+            String[] strColNames = null;
+            List<Data>[] listColData = null;
+
+            listColData = new List<Data>[sqliteReader.VisibleFieldCount];
+            strColNames = new String[sqliteReader.VisibleFieldCount];
+            for (iColumn = 0; iColumn < sqliteReader.VisibleFieldCount; iColumn++)
+            {
+                listColData[iColumn] = new List<Data>();
+                strColNames[iColumn] = sqliteReader.GetName(iColumn);
+            }
+            
+            
+            
             while (sqliteReader.Read() == true)
             {
-                for (int iCol = 0; iCol < strResultColumns.Length; iCol++)
+                for (iColumn = 0; iColumn < sqliteReader.VisibleFieldCount; iColumn++)
                 {
-                    DataTable[iData, iCol] = new Data();
+                    String str;
+                    Data d = null;
+                    switch (str = sqliteReader.GetDataTypeName(iColumn))
+                    {
+                        case "INTEGER":
+                            d = new Data(DATA_T.INTEGER);
+                            d.Set(sqliteReader.GetInt32(iColumn));
+                            break;
+                        case "REAL":
+                            d = new Data(DATA_T.DOUBLE);
+                            d.Set(sqliteReader.GetDouble(iColumn));
+                            break;
+                        case "BOOLEAN":
+                            d = new Data(DATA_T.BOOLEAN);
+                            d.Set(sqliteReader.GetBoolean(iColumn));
+                            break;
+                        case "DATETIME":
+                            d = new Data(DATA_T.DATETIME);
+                            d.Set(sqliteReader.GetDateTime(iColumn));
+                            break;
+                        case "STRING":
+                            d = new Data(DATA_T.STRING);
+                            d.Set(sqliteReader.GetString(iColumn));
+                            break;
+                    }
+                    listColData[iColumn].Add(d);
                 }
-                
+            }
+
+
+                String strId = "";
+                String strDate = "";
+                String strItem = "";
+                String strAmount = "";
+                String strCategory = "";
+                String strDescription = "";
+                String strCheck = "";
                 strId = strId + sqliteReader["id"].ToString() + ",";
                 strDate = strDate + sqliteReader["date"].ToString() + ",";
                 strItem = strItem + sqliteReader["item"].ToString() + ",";
@@ -541,6 +581,14 @@ namespace Al.Database
                 strDescription = strDescription + sqliteReader["description"].ToString() + ",";
                 strCheck = strCheck + sqliteReader["check"].ToString() + ",";
 
+                //Data d1 = new Data(DATA_T.INTEGER);
+                //d1.Set(sqliteReader.GetInt32(0));
+                //Data date1 = new Data(DATA_T.DATETIME);
+                //date1.Set(sqliteReader.GetDateTime(1));
+                //Data ditem1 = new Data(DATA_T.STRING);
+                //ditem1.Set(sqliteReader.GetString(2));
+
+                String strDataType;
                 strDataType = sqliteReader.GetDataTypeName(0);
                 strDataType = sqliteReader.GetDataTypeName(1);
                 strDataType = sqliteReader.GetDataTypeName(2);
@@ -549,6 +597,7 @@ namespace Al.Database
                 strDataType = sqliteReader.GetDataTypeName(5);
                 strDataType = sqliteReader.GetDataTypeName(6);
 
+                int iIndex;
                 iIndex = sqliteReader.GetOrdinal("id");
                 iIndex = sqliteReader.GetOrdinal("date");
                 iIndex = sqliteReader.GetOrdinal("item");
@@ -556,7 +605,7 @@ namespace Al.Database
                 iIndex = sqliteReader.GetOrdinal("category");
                 iIndex = sqliteReader.GetOrdinal("description");
                 iIndex = sqliteReader.GetOrdinal("check");
-            }
+            
 
             m_sqliteConn.Close();
 
