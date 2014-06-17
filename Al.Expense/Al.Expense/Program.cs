@@ -10,6 +10,7 @@ namespace Al.Expense
     static class Program
     {
         private const String CONFIG_PATH = "alexpense.config";
+        private const String DB_PATH = "alexpense.db";
 
         /// <summary>
         /// The main entry point for the application.
@@ -25,7 +26,7 @@ namespace Al.Expense
 
             
             if (File.Exists(CONFIG_PATH) == true)
-                Application.Run(new Form_Main(CONFIG_PATH));
+                Application.Run(new Form_Main(CONFIG_PATH, DB_PATH));
 
             Application.Exit();
         }

@@ -15,14 +15,15 @@ namespace Al.Expense
 {
     public partial class Form_Main : Form
     {
-        private const String DB_PATH = "alexpense.db";
+        
         private String m_strConfigName;
         private DatabaseApi m_Db;
 
-        public Form_Main(String strConfigName)
+        public Form_Main(String strConfigName, String strDbPath)
         {
             InitializeComponent();
             m_strConfigName = strConfigName;
+            m_Db = new DatabaseApi(strDbPath, null);
 
             //  Template test for DatabaseApi class
             createTable();
@@ -34,8 +35,6 @@ namespace Al.Expense
         private void createTable()
         {
             COLUMN_DEF_S[] ColDef = new COLUMN_DEF_S[7];
-
-            m_Db = new DatabaseApi(DB_PATH, null);
 
             String[] strColumnNames = new String[7] { "id", "date", "item", "amount", "category", "description", "check" };
             DATA_T[] DataTypes = new DATA_T[7] { DATA_T.INTEGER, DATA_T.DATETIME, DATA_T.STRING, DATA_T.DOUBLE, DATA_T.INTEGER, DATA_T.STRING, DATA_T.BOOLEAN };

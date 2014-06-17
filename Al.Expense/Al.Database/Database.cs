@@ -318,6 +318,11 @@ namespace Al.Database
         private String m_strPassword;
         private Char[] m_cTrimToken = { ' ', ',' };
 
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        /// <param name="strDbFullPath">The path and the file name of the database.</param>
+        /// <param name="strPassword">The password. If null than there is no password.</param>
         public DatabaseApi(String strDbFullPath, String strPassword)
         {
             m_strDbFullPath = strDbFullPath;
@@ -336,6 +341,11 @@ namespace Al.Database
         {
         }
 
+        /// <summary>
+        /// Create the table.
+        /// </summary>
+        /// <param name="strTableName">The table name.</param>
+        /// <param name="ColumnDef">The column definition.</param>
         public void createTable(String strTableName, COLUMN_DEF_S[] ColumnDef)
         {
             String strColumnDef = "";
@@ -420,6 +430,14 @@ namespace Al.Database
             m_sqliteConn.Close();
         }
 
+        /// <summary>
+        /// Insert data into the table.
+        /// </summary>
+        /// <param name="strTableName">The table name.</param>
+        /// <param name="Data">
+        /// The data. 
+        /// The column which doesn't be specified in the array will be null or default value.
+        /// </param>
         public void insertData(String strTableName, COLUMN_DATA_S[] Data)
         {
             String strColumns = "";
@@ -449,7 +467,7 @@ namespace Al.Database
         }
 
         /// <summary>
-        /// Delete data(s) from the table.
+        /// Delete data from the table.
         /// </summary>
         /// <param name="strTableName">The table name</param>
         /// <param name="Exp">The selct expression array. If it is null, the function deletes all datas in the table.</param>
@@ -477,8 +495,25 @@ namespace Al.Database
             m_sqliteConn.Close();
         }
 
+        /// <summary>
+        /// Select data from the table.
+        /// </summary>
+        /// <param name="strTableName">The table name.</param>
+        /// <param name="strResultColumns">
+        /// The selected column name(s). 
+        /// If it's null, all columns are selected.
+        /// </param>
+        /// <param name="Exp">The select expression(s). 
+        /// If it's null, all data are selected.
+        /// </param>
+        /// <returns>
+        /// All selected datas are stored in a 2D array - Data[ColumnNum][DataNum]
+        /// </returns>
         public Data[][] selectData(String strTableName, String[] strResultColumns, SELECT_EXPRES_S[] Exp)
         {
+            //
+            //  Prepare and execute the command.
+            //
             SQLiteDataReader sqliteReader;
             String strSingleExpCmd = "";
             String strExpsCmd = "";
@@ -514,31 +549,25 @@ namespace Al.Database
             sqliteReader = m_sqliteCmd.ExecuteReader();
             
             //
-            //  Read the data
+            //  Read the data and store them in list.
             //
-            Data[][] DataTable = null;
-
-            int iColumn;
-            String[] strColNames = null;
             List<Data>[] listColData = null;
+            int iColumn;
 
+            //  Allocate lists for each column.
             listColData = new List<Data>[sqliteReader.VisibleFieldCount];
-            strColNames = new String[sqliteReader.VisibleFieldCount];
             for (iColumn = 0; iColumn < sqliteReader.VisibleFieldCount; iColumn++)
             {
                 listColData[iColumn] = new List<Data>();
-                strColNames[iColumn] = sqliteReader.GetName(iColumn);
             }
             
-            
-            
+            //  Store data in list.
             while (sqliteReader.Read() == true)
             {
                 for (iColumn = 0; iColumn < sqliteReader.VisibleFieldCount; iColumn++)
                 {
-                    String str;
                     Data d = null;
-                    switch (str = sqliteReader.GetDataTypeName(iColumn))
+                    switch (sqliteReader.GetDataTypeName(iColumn))
                     {
                         case "INTEGER":
                             d = new Data(DATA_T.INTEGER);
@@ -564,48 +593,16 @@ namespace Al.Database
                     listColData[iColumn].Add(d);
                 }
             }
-
-
-                String strId = "";
-                String strDate = "";
-                String strItem = "";
-                String strAmount = "";
-                String strCategory = "";
-                String strDescription = "";
-                String strCheck = "";
-                strId = strId + sqliteReader["id"].ToString() + ",";
-                strDate = strDate + sqliteReader["date"].ToString() + ",";
-                strItem = strItem + sqliteReader["item"].ToString() + ",";
-                strAmount = strAmount + sqliteReader["amount"].ToString() + ",";
-                strCategory = strCategory + sqliteReader["category"].ToString() + ",";
-                strDescription = strDescription + sqliteReader["description"].ToString() + ",";
-                strCheck = strCheck + sqliteReader["check"].ToString() + ",";
-
-                //Data d1 = new Data(DATA_T.INTEGER);
-                //d1.Set(sqliteReader.GetInt32(0));
-                //Data date1 = new Data(DATA_T.DATETIME);
-                //date1.Set(sqliteReader.GetDateTime(1));
-                //Data ditem1 = new Data(DATA_T.STRING);
-                //ditem1.Set(sqliteReader.GetString(2));
-
-                String strDataType;
-                strDataType = sqliteReader.GetDataTypeName(0);
-                strDataType = sqliteReader.GetDataTypeName(1);
-                strDataType = sqliteReader.GetDataTypeName(2);
-                strDataType = sqliteReader.GetDataTypeName(3);
-                strDataType = sqliteReader.GetDataTypeName(4);
-                strDataType = sqliteReader.GetDataTypeName(5);
-                strDataType = sqliteReader.GetDataTypeName(6);
-
-                int iIndex;
-                iIndex = sqliteReader.GetOrdinal("id");
-                iIndex = sqliteReader.GetOrdinal("date");
-                iIndex = sqliteReader.GetOrdinal("item");
-                iIndex = sqliteReader.GetOrdinal("amount");
-                iIndex = sqliteReader.GetOrdinal("category");
-                iIndex = sqliteReader.GetOrdinal("description");
-                iIndex = sqliteReader.GetOrdinal("check");
             
+            //
+            //  Save data from list to DataTable.
+            //
+            Data[][] DataTable = null;
+            DataTable = new Data[sqliteReader.VisibleFieldCount][];
+            for (iColumn = 0; iColumn < sqliteReader.VisibleFieldCount; iColumn++)
+            {
+                DataTable[iColumn] = listColData[iColumn].ToArray();
+            }
 
             m_sqliteConn.Close();
 
