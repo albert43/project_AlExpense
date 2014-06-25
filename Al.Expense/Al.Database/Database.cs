@@ -8,6 +8,12 @@ using System.Data.SQLite;
 
 namespace Al.Database
 {
+    public struct TABLE_DEF_S
+    {
+        public String strTableName;
+        public COLUMN_DEF_S[] Columns;
+    }
+
     /// <summary>
     /// The column definition.
     /// </summary>
